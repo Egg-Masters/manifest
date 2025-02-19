@@ -1,7 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("📢 DOM Loaded, Initializing TonWeb...");
+    console.log("📢 DOM Loaded, Initializing TonConnect & TonWeb...");
 
-    const tonweb = new TonWeb(); // Initialize TonWeb instance
+    // Initialize TonConnect
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://markmon08.github.io/Gem-SPIDER/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect'
+    });
+
+    // Initialize TonWeb
+    const tonweb = new TonWeb();
+    
     const buyButton = document.getElementById("buy-tokens-btn");
     const amountInput = document.getElementById("amount-input");
     const tonBalanceElem = document.getElementById("ton-balance");
@@ -11,21 +19,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     const recipientAddress = "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST"; // Replace with your recipient wallet
 
     function formatBalance(balance) {
-        return (balance / 1e9).toFixed(6).replace(/\.0+$/, ""); // Format TON balance
+        return (balance / 1e9).toFixed(6).replace(/\.0+$/, "");
     }
 
     async function fetchBalances(walletAddress) {
         try {
-            // Fetch TON balance
-            const balance = await tonweb.getBalance(walletAddress);
-            tonBalanceElem.textContent = balance ? formatBalance(balance) : "0";
+            // Fetch TON balance using TonConnect
+            const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
+            if (!tonResponse.ok) throw new Error("Failed to fetch TON balance");
+            const tonData = await tonResponse.json();
+            const tonBalance = tonData.balance ? formatBalance(tonData.balance) : "0";
+            tonBalanceElem.textContent = tonBalance;
 
-            // Fetch $SPIDEY Token Balance (Jetton)
+            // Fetch $SPIDEY Token Balance using TonWeb (Jetton)
             const spideyTokenAddress = "EQxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Replace with actual contract address
-            const tokenBalance = await tonweb.call(spideyTokenAddress, 'get_balance', []);
-            spideyBalanceElem.textContent = tokenBalance ? formatBalance(tokenBalance) : "0";
+            const jettonWallet = new tonweb.token.jetton.JettonWallet(tonweb.provider, {
+                address: spideyTokenAddress
+            });
+            const jettonBalance = await jettonWallet.methods.getBalance().call();
+            spideyBalanceElem.textContent = jettonBalance ? formatBalance(jettonBalance) : "0";
 
-            console.log("💰 Balances Updated:", { balance, tokenBalance });
+            console.log("💰 Balances Updated:", { tonBalance, jettonBalance });
         } catch (error) {
             console.error("⚠️ Error Fetching Balances:", error.message);
             tonBalanceElem.textContent = "Error";
@@ -46,13 +60,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-            const tx = await tonweb.sendTransaction({
-                from: userWallet,
-                to: recipientAddress,
-                value: TonWeb.utils.toNano(amount),
-            });
+            const transaction = {
+                validUntil: Math.floor(Date.now() / 1000) + 300, // Expires in 5 minutes
+                messages: [
+                    {
+                        address: recipientAddress,
+                        amount: (amount * 1e9).toString(), // Convert TON to nanotons
+                    }
+                ]
+            };
 
-            console.log("✅ Transaction Sent:", tx);
+            await tonConnectUI.sendTransaction(transaction);
+            console.log("✅ Transaction Sent");
             alert("Transaction sent successfully!");
         } catch (error) {
             console.error("⚠️ Transaction Failed:", error);
@@ -60,7 +79,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    buyButton.addEventListener("click", sendTransaction);
+    async function updateWalletStatus() {
+        try {
+            const connectedWallet = await tonConnectUI.getWallet();
+            if (connectedWallet && connectedWallet.account) {
+                userWallet = connectedWallet.account.address;
+                buyButton.disabled = false;
+                await fetchBalances(userWallet);
+            } else {
+                setDisconnected();
+            }
+        } catch (error) {
+            console.error("⚠️ Error Checking Wallet Status:", error);
+            setDisconnected();
+        }
+    }
 
-    console.log("🔄 Ready for Wallet Connection!");
+    function setDisconnected() {
+        console.log("❌ No Wallet Connected");
+        userWallet = null;
+        tonBalanceElem.textContent = "0";
+        spideyBalanceElem.textContent = "0";
+        buyButton.disabled = true;
+    }
+
+    tonConnectUI.onStatusChange(async (wallet) => {
+        console.log("🔄 Wallet Status Changed:", wallet);
+        await updateWalletStatus();
+    });
+
+    setTimeout(async () => {
+        console.log("🔄 Checking Initial Wallet Status...");
+        await updateWalletStatus();
+    }, 1000);
+
+    buyButton.addEventListener("click", sendTransaction);
 });
