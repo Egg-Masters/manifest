@@ -9,12 +9,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const walletStatus = document.getElementById("wallet-status");
     const buyButton = document.getElementById("buy-tokens-btn");
     const amountInput = document.getElementById("amount-input");
-    const balanceDisplay = document.createElement("p"); // Token Balance Display
+    const balanceDisplay = document.createElement("p");
 
     let userWallet = null;
 
-    // 🔹 Function to fetch user's wallet status
-    async function checkWalletStatus() {
+    // 🔹 Function to update wallet status
+    async function updateWalletStatus() {
         try {
             const connectedWallet = await tonConnectUI.getWallet();
             if (connectedWallet && connectedWallet.account) {
@@ -22,50 +22,51 @@ document.addEventListener("DOMContentLoaded", async () => {
                 walletStatus.innerHTML = `🟢 Connected: <br> ${userWallet}`;
                 walletStatus.style.color = "lightgreen";
                 buyButton.disabled = false;
-                fetchTokenBalance();
+                await fetchTokenBalance();
             } else {
-                userWallet = null;
-                walletStatus.innerText = "🔴 Not Connected";
-                walletStatus.style.color = "red";
-                buyButton.disabled = true;
-                balanceDisplay.innerText = "";
+                setDisconnected();
             }
         } catch (error) {
             console.error("Error checking wallet status:", error);
-            walletStatus.innerText = "🔴 Error Connecting";
-            walletStatus.style.color = "red";
+            setDisconnected();
         }
     }
 
-    // 🔹 Function to fetch user's $SPIDER token balance
+    // 🔹 Function to set disconnected state
+    function setDisconnected() {
+        userWallet = null;
+        walletStatus.innerText = "🔴 Not Connected";
+        walletStatus.style.color = "red";
+        buyButton.disabled = true;
+        balanceDisplay.innerText = "";
+    }
+
+    // 🔹 Fetch user's $SPIDER token balance
     async function fetchTokenBalance() {
         if (!userWallet) return;
-        
+
         try {
             const response = await fetch(`https://tonapi.io/v2/accounts/${userWallet}/jettons`);
             const data = await response.json();
-            
+
             const spiderToken = data.jettons.find(jetton => jetton.jetton.address === "YOUR_SPIDER_TOKEN_CONTRACT");
 
-            if (spiderToken) {
-                const balance = parseFloat(spiderToken.balance) / 1e9;
-                balanceDisplay.innerText = `Your $SPIDER Balance: ${balance.toFixed(2)}`;
-            } else {
-                balanceDisplay.innerText = "Your $SPIDER Balance: 0";
-            }
+            balanceDisplay.innerText = spiderToken
+                ? `Your $SPIDER Balance: ${(parseFloat(spiderToken.balance) / 1e9).toFixed(2)}`
+                : "Your $SPIDER Balance: 0";
         } catch (error) {
             console.error("Failed to fetch token balance:", error);
             balanceDisplay.innerText = "Error fetching balance!";
         }
     }
 
-    // 🔹 Monitor Wallet Connection Status
+    // 🔹 Listen for Wallet Connection Status Changes
     tonConnectUI.onStatusChange(async (wallet) => {
         console.log("Wallet Status Changed:", wallet);
-        await checkWalletStatus();
+        await updateWalletStatus();
     });
 
-    // 🔹 Function to send TON when "Buy" button is clicked
+    // 🔹 Send TON when "Buy" button is clicked
     buyButton.addEventListener("click", async () => {
         if (!userWallet) {
             alert("Please connect your wallet first!");
@@ -83,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 validUntil: Math.floor(Date.now() / 1000) + 60,
                 messages: [
                     {
-                        address: "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST", // Replace with your TON address
+                        address: "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST", // Replace with actual TON receiving address
                         amount: (amount * 1e9).toString(),
                         payload: "Purchase of $SPIDER tokens"
                     }
@@ -103,6 +104,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Append balance display under wallet status
     walletStatus.parentElement.appendChild(balanceDisplay);
 
-    // Check wallet status on page load
-    await checkWalletStatus();
+    // Initial status check when the page loads
+    await updateWalletStatus();
 });
