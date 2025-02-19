@@ -23,16 +23,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 🔹 Fetch TON and $SPIDEY Balances
     async function fetchBalances(walletAddress) {
         try {
-            // Fetch TON Balance
-            const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
+            // Fetch TON Balance from TonCenter
+            const tonResponse = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${walletAddress}`);
             if (!tonResponse.ok) throw new Error("Failed to fetch TON balance");
             const tonData = await tonResponse.json();
             const tonBalance = tonData.balance ? formatBalance(tonData.balance) : "0";
             tonBalanceElem.textContent = tonBalance;
 
-            // Fetch $SPIDEY Token Balance
+            // Fetch $SPIDEY Token Balance (Suggest using a dedicated Jetton API)
             const spideyTokenAddress = "EQxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Replace with actual contract address
-            const tokenResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons`);
+            const tokenResponse = await fetch(`https://tonapi.io/v1/account/${walletAddress}/jettons`);
             if (!tokenResponse.ok) throw new Error("Failed to fetch token balance");
             const tokenData = await tokenResponse.json();
             const spideyBalance = tokenData.balances?.find(token => token.jetton.address === spideyTokenAddress);
