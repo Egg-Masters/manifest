@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const spideyBalanceElem = document.getElementById("spidey-balance");
 
     let userWallet = null;
-    const recipientAddress = "EQCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // Replace with your recipient wallet
+    const recipientAddress = "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST"; // Replace with your recipient wallet
 
     // 🔹 Format balance to 6 decimal places
     function formatBalance(balance) {
