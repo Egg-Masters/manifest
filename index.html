@@ -54,7 +54,6 @@
         .btn-success { background-color: #28a745; color: white; }
         .btn-danger { background-color: #dc3545; color: white; }
         .btn-hover:hover { opacity: 0.8; }
-        .hidden { display: none; }
         .footer {
             padding: 15px;
             background: rgba(0, 0, 0, 0.2);
@@ -84,7 +83,6 @@
     </style>
 </head>
 <body>
-
     <header class="header">
         <div class="logo">
             <img src="logo.png" alt="Gem Spider Logo" width="50">
@@ -97,7 +95,6 @@
         <div class="card">
             <h2>Wallet Connection</h2>
             <div id="ton-connect"></div>
-            <p id="wallet-status" class="status">🔴 Not Connected</p>
 
             <!-- Balance Display -->
             <div class="balance-container">
@@ -132,57 +129,50 @@
                 buttonRootId: 'ton-connect'
             });
 
-            const walletStatus = document.getElementById("wallet-status");
             const tonBalanceElement = document.getElementById("ton-balance");
             const spideyBalanceElement = document.getElementById("spidey-balance");
             const buyButton = document.getElementById("buy-tokens-btn");
 
-            async function updateWalletStatus(wallet) {
-                if (wallet) {
-                    const address = wallet.account.address;
-                    walletStatus.innerHTML = `🟢 Connected: <br> ${address}`;
-                    buyButton.disabled = false;
-                    await updateBalances(address);
-                } else {
-                    walletStatus.textContent = "🔴 Not Connected";
-                    buyButton.disabled = true;
-                    tonBalanceElement.textContent = "0 TON";
-                    spideyBalanceElement.textContent = "0 SPIDEY";
-                }
-            }
-
             async function updateBalances(walletAddress) {
                 try {
-                    // Fetch TON balance (Example API, replace with actual TON API)
                     const tonBalance = await fetchTonBalance(walletAddress);
                     tonBalanceElement.textContent = `${tonBalance.toFixed(3)} TON`;
 
-                    // Fetch $SPIDEY balance (Replace with actual token API)
                     const spideyBalance = await fetchSpideyBalance(walletAddress);
                     spideyBalanceElement.textContent = `${spideyBalance.toFixed(3)} SPIDEY`;
-
                 } catch (error) {
                     console.error("Error fetching balances:", error);
                 }
             }
 
             async function fetchTonBalance(address) {
-                // Replace with actual TON API
-                return Math.random() * 10; // Simulated balance for testing
+                return Math.random() * 10;
             }
 
             async function fetchSpideyBalance(address) {
-                // Replace with actual $SPIDEY token balance API
-                return Math.random() * 1000; // Simulated balance for testing
+                return Math.random() * 1000;
             }
 
-            tonConnectUI.getWallet().then(updateWalletStatus).catch(() => {
-                walletStatus.textContent = "🔴 Not Connected";
+            tonConnectUI.getWallet().then(wallet => {
+                if (wallet) {
+                    buyButton.disabled = false;
+                    updateBalances(wallet.account.address);
+                } else {
+                    buyButton.disabled = true;
+                    tonBalanceElement.textContent = "0 TON";
+                    spideyBalanceElement.textContent = "0 SPIDEY";
+                }
             });
 
-            tonConnectUI.onStatusChange(updateWalletStatus);
+            tonConnectUI.onStatusChange(wallet => {
+                if (wallet) {
+                    buyButton.disabled = false;
+                    updateBalances(wallet.account.address);
+                } else {
+                    buyButton.disabled = true;
+                }
+            });
         });
     </script>
-
 </body>
 </html>
