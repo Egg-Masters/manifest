@@ -13,13 +13,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let userWallet = null;
 
+    // 🔹 Format balance to 6 decimal places
+    function formatBalance(balance) {
+        return (balance / 1e9).toFixed(6).replace(/\.?0+$/, ""); // Trim trailing zeroes
+    }
+
     // 🔹 Fetch TON and $SPIDEY Balances
     async function fetchBalances(walletAddress) {
         try {
             // Fetch TON Balance
             const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
             const tonData = await tonResponse.json();
-            const tonBalance = tonData.balance ? (tonData.balance / 1e9).toFixed(2) : "0";
+            const tonBalance = tonData.balance ? formatBalance(tonData.balance) : "0";
             tonBalanceElem.textContent = tonBalance;
 
             // Fetch $SPIDEY Token Balance
@@ -27,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const tokenResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons`);
             const tokenData = await tokenResponse.json();
             const spideyBalance = tokenData.balances.find(token => token.jetton.address === spideyTokenAddress);
-            spideyBalanceElem.textContent = spideyBalance ? (spideyBalance.balance / 1e9).toFixed(2) : "0";
+            spideyBalanceElem.textContent = spideyBalance ? formatBalance(spideyBalance.balance) : "0";
 
             console.log("💰 Balances Updated:", { tonBalance, spideyBalance: spideyBalanceElem.textContent });
         } catch (error) {
