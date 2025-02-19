@@ -7,13 +7,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         buttonRootId: 'ton-connect'
     });
 
-    const walletStatus = document.getElementById("wallet-status");
     const buyButton = document.getElementById("buy-tokens-btn");
-    const amountInput = document.getElementById("amount-input");
+    const tonBalanceElem = document.getElementById("ton-balance");
+    const spideyBalanceElem = document.getElementById("spidey-balance");
 
     let userWallet = null;
 
-    // 🔹 Function to update wallet status
+    // 🔹 Fetch TON and $SPIDEY Balances
+    async function fetchBalances(walletAddress) {
+        try {
+            // Fetch TON Balance
+            const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
+            const tonData = await tonResponse.json();
+            const tonBalance = tonData.balance ? (tonData.balance / 1e9).toFixed(2) : "0";
+            tonBalanceElem.textContent = tonBalance;
+
+            // Fetch $SPIDEY Token Balance
+            const spideyTokenAddress = "EQxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Replace with actual contract address
+            const tokenResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons`);
+            const tokenData = await tokenResponse.json();
+            const spideyBalance = tokenData.balances.find(token => token.jetton.address === spideyTokenAddress);
+            spideyBalanceElem.textContent = spideyBalance ? (spideyBalance.balance / 1e9).toFixed(2) : "0";
+
+            console.log("💰 Balances Updated:", { tonBalance, spideyBalance: spideyBalanceElem.textContent });
+        } catch (error) {
+            console.error("⚠️ Error Fetching Balances:", error);
+        }
+    }
+
+    // 🔹 Update UI on Wallet Connect
     async function updateWalletStatus() {
         try {
             const connectedWallet = await tonConnectUI.getWallet();
@@ -21,9 +43,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (connectedWallet && connectedWallet.account) {
                 userWallet = connectedWallet.account.address;
-                walletStatus.innerHTML = `🟢 Connected: <br> ${userWallet}`;
-                walletStatus.style.color = "lightgreen";
                 buyButton.disabled = false;
+                await fetchBalances(userWallet);
             } else {
                 setDisconnected();
             }
@@ -33,12 +54,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // 🔹 Function to set disconnected state
+    // 🔹 Handle Disconnected State
     function setDisconnected() {
         console.log("❌ No Wallet Connected");
         userWallet = null;
-        walletStatus.innerText = "🔴 Not Connected";
-        walletStatus.style.color = "red";
+        tonBalanceElem.textContent = "0";
+        spideyBalanceElem.textContent = "0";
         buyButton.disabled = true;
     }
 
