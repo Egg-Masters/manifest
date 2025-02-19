@@ -1,5 +1,7 @@
 // Initialize TON Connect
+const { TonConnect } = window;
 const tonConnect = new TonConnect();
+
 
 // DOM Elements
 document.addEventListener("DOMContentLoaded", async () => {
