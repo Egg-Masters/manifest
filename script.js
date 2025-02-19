@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Initialize TonWeb
     const tonweb = new TonWeb();
-    
+
     const buyButton = document.getElementById("buy-tokens-btn");
     const amountInput = document.getElementById("amount-input");
     const tonBalanceElem = document.getElementById("ton-balance");
@@ -48,11 +48,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     async function sendTransaction() {
-        if (!userWallet) {
-            alert("Please connect your wallet first.");
-            return;
-        }
-
         const amount = parseFloat(amountInput.value);
         if (isNaN(amount) || amount <= 0) {
             alert("Please enter a valid TON amount.");
@@ -70,6 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ]
             };
 
+            console.log("🚀 Sending Transaction:", transaction);
             await tonConnectUI.sendTransaction(transaction);
             console.log("✅ Transaction Sent");
             alert("Transaction sent successfully!");
@@ -84,7 +80,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             const connectedWallet = await tonConnectUI.getWallet();
             if (connectedWallet && connectedWallet.account) {
                 userWallet = connectedWallet.account.address;
-                buyButton.disabled = false;
                 await fetchBalances(userWallet);
             } else {
                 setDisconnected();
@@ -100,7 +95,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         userWallet = null;
         tonBalanceElem.textContent = "0";
         spideyBalanceElem.textContent = "0";
-        buyButton.disabled = true;
     }
 
     tonConnectUI.onStatusChange(async (wallet) => {
