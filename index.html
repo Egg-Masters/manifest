@@ -110,55 +110,29 @@
 
     <!-- TON Connect Initialization -->
     <script>
-        document.addEventListener("DOMContentLoaded", async function () {
-            console.log("📢 Initializing TON Connect UI...");
-
+        document.addEventListener("DOMContentLoaded", function () {
             const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
                 manifestUrl: 'https://markmon08.github.io/Gem-SPIDER/tonconnect-manifest.json',
                 buttonRootId: 'ton-connect'
             });
 
-            const walletStatus = document.getElementById("wallet-status");
-            const buyButton = document.getElementById("buy-tokens-btn");
-
-            // 🔹 Function to Update Wallet Status
-            async function updateWalletStatus() {
-                try {
-                    const wallet = await tonConnectUI.getWallet();
-                    console.log("✅ Wallet Status Checked:", wallet);
-
-                    if (wallet && wallet.account) {
-                        walletStatus.innerHTML = `🟢 Connected: <br> ${wallet.account.address}`;
-                        walletStatus.style.color = "lightgreen";
-                        buyButton.disabled = false;
-                    } else {
-                        setDisconnected();
-                    }
-                } catch (error) {
-                    console.error("⚠️ Error Checking Wallet Status:", error);
-                    setDisconnected();
+            function updateWalletStatus(wallet) {
+                if (wallet) {
+                    document.getElementById("wallet-status").textContent = "🟢 Connected: " + wallet.account.address;
+                    document.getElementById("buy-tokens-btn").disabled = false; // Enable button on connection
+                } else {
+                    document.getElementById("wallet-status").textContent = "🔴 Not Connected";
+                    document.getElementById("buy-tokens-btn").disabled = true; // Disable button when not connected
                 }
             }
 
-            // 🔹 Function to Handle Disconnected State
-            function setDisconnected() {
-                console.log("❌ Wallet Disconnected");
-                walletStatus.innerText = "🔴 Not Connected";
-                walletStatus.style.color = "red";
-                buyButton.disabled = true;
-            }
-
-            // 🔹 Event Listener for Wallet Connection Changes
-            tonConnectUI.onStatusChange(async (wallet) => {
-                console.log("🔄 Wallet Status Changed:", wallet);
-                await updateWalletStatus();
+            // Check wallet status immediately when the page loads
+            tonConnectUI.getWallet().then(updateWalletStatus).catch(() => {
+                document.getElementById("wallet-status").textContent = "🔴 Not Connected";
             });
 
-            // 🔹 Check Initial Connection (After Small Delay)
-            setTimeout(async () => {
-                console.log("🔄 Checking Initial Wallet Status...");
-                await updateWalletStatus();
-            }, 1000);
+            // Monitor Wallet Connection Status
+            tonConnectUI.onStatusChange(updateWalletStatus);
         });
     </script>
 
