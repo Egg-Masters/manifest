@@ -3,33 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Wallet</title>
-    <script src="https://unpkg.com/@tonconnect/ui@latest"></script>
-    <script defer src="script.js"></script>
+    <title>Gem Spider - Token Pre Sale</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- TON Connect SDK -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .balance-container { margin-top: 20px; }
-        .balance-label { font-weight: bold; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            padding: 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .logo img {
+            animation: pulse 2s infinite;
+        }
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 350px;
+            animation: slideUp 1s ease-in-out;
+        }
+        .btn-primary, .btn-success, .btn-danger {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-hover:hover { opacity: 0.8; }
+        .hidden { display: none; }
+        .footer {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .social-icons a {
+            color: white;
+            margin: 0 10px;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+        .social-icons a:hover {
+            transform: scale(1.2);
+        }
+        .balance-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .balance-label {
+            font-weight: bold;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <h1>TON Wallet Integration</h1>
+    <header class="header">
+        <div class="logo">
+            <img src="logo.png" alt="Gem Spider Logo" width="50">
+        </div>
+        <h1>Gem Spider</h1>
+        <p>Token Pre Sale - Get your $SPIDER tokens now!</p>
+    </header>
 
-    <!-- Wallet Connect Button -->
-    <div id="ton-connect"></div>
+    <main class="main-content">
+        <div class="card">
+            <h2>Wallet Connection</h2>
+            <div id="ton-connect"></div>
+            <p id="wallet-status" class="status">🔴 Not Connected</p>
 
-    <!-- Balance Display -->
-    <div class="balance-container">
-        <p class="balance-label">TON Balance:</p>
-        <p id="ton-balance">0</p>
+            <!-- Balance Display -->
+            <div class="balance-container">
+                <p class="balance-label">TON Balance:</p>
+                <p id="ton-balance">0 TON</p>
 
-        <p class="balance-label">$SPIDEY Balance:</p>
-        <p id="spidey-balance">0</p>
-    </div>
+                <p class="balance-label">$SPIDEY Balance:</p>
+                <p id="spidey-balance">0 SPIDEY</p>
+            </div>
 
-    <!-- Buy Button -->
-    <button id="buy-tokens-btn" disabled>Buy Tokens</button>
+            <div class="buy-section">
+                <h2>Buy $SPIDER Tokens</h2>
+                <input type="number" id="amount-input" placeholder="Enter TON amount">
+                <button id="buy-tokens-btn" class="btn-success btn-hover" disabled>Buy $SPIDER</button>
+                <p id="transaction-status" class="status"></p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-telegram"></i></a>
+        </div>
+    </footer>
+
+    <!-- TON Connect Initialization -->
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://markmon08.github.io/Gem-SPIDER/tonconnect-manifest.json',
+                buttonRootId: 'ton-connect'
+            });
+
+            const walletStatus = document.getElementById("wallet-status");
+            const tonBalanceElement = document.getElementById("ton-balance");
+            const spideyBalanceElement = document.getElementById("spidey-balance");
+            const buyButton = document.getElementById("buy-tokens-btn");
+
+            async function updateWalletStatus(wallet) {
+                if (wallet) {
+                    const address = wallet.account.address;
+                    walletStatus.innerHTML = `🟢 Connected: <br> ${address}`;
+                    buyButton.disabled = false;
+                    await updateBalances(address);
+                } else {
+                    walletStatus.textContent = "🔴 Not Connected";
+                    buyButton.disabled = true;
+                    tonBalanceElement.textContent = "0 TON";
+                    spideyBalanceElement.textContent = "0 SPIDEY";
+                }
+            }
+
+            async function updateBalances(walletAddress) {
+                try {
+                    // Fetch TON balance (Example API, replace with actual TON API)
+                    const tonBalance = await fetchTonBalance(walletAddress);
+                    tonBalanceElement.textContent = `${tonBalance.toFixed(3)} TON`;
+
+                    // Fetch $SPIDEY balance (Replace with actual token API)
+                    const spideyBalance = await fetchSpideyBalance(walletAddress);
+                    spideyBalanceElement.textContent = `${spideyBalance.toFixed(3)} SPIDEY`;
+
+                } catch (error) {
+                    console.error("Error fetching balances:", error);
+                }
+            }
+
+            async function fetchTonBalance(address) {
+                // Replace with actual TON API
+                return Math.random() * 10; // Simulated balance for testing
+            }
+
+            async function fetchSpideyBalance(address) {
+                // Replace with actual $SPIDEY token balance API
+                return Math.random() * 1000; // Simulated balance for testing
+            }
+
+            tonConnectUI.getWallet().then(updateWalletStatus).catch(() => {
+                walletStatus.textContent = "🔴 Not Connected";
+            });
+
+            tonConnectUI.onStatusChange(updateWalletStatus);
+        });
+    </script>
 
 </body>
 </html>
