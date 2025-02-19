@@ -24,7 +24,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function fetchBalances(walletAddress) {
         try {
-            // Fetch TON balance using TonConnect
+            if (!walletAddress) {
+                console.warn("⚠️ Wallet address is undefined, skipping balance fetch.");
+                return;
+            }
+
+            // Fetch TON balance
             const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
             if (!tonResponse.ok) throw new Error("Failed to fetch TON balance");
             const tonData = await tonResponse.json();
@@ -69,6 +74,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             await tonConnectUI.sendTransaction(transaction);
             console.log("✅ Transaction Sent");
             alert("Transaction sent successfully!");
+
+            // Refresh balances after transaction
+            if (userWallet) {
+                await fetchBalances(userWallet);
+            }
         } catch (error) {
             console.error("⚠️ Transaction Failed:", error);
             alert("Transaction failed: " + error.message);
@@ -80,6 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const connectedWallet = await tonConnectUI.getWallet();
             if (connectedWallet && connectedWallet.account) {
                 userWallet = connectedWallet.account.address;
+                buyButton.disabled = false;
                 await fetchBalances(userWallet);
             } else {
                 setDisconnected();
@@ -93,19 +104,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     function setDisconnected() {
         console.log("❌ No Wallet Connected");
         userWallet = null;
+        buyButton.disabled = true;
         tonBalanceElem.textContent = "0";
         spideyBalanceElem.textContent = "0";
     }
 
+    // Automatically update wallet status when the connection changes
     tonConnectUI.onStatusChange(async (wallet) => {
         console.log("🔄 Wallet Status Changed:", wallet);
         await updateWalletStatus();
     });
 
+    // Initial wallet status check
     setTimeout(async () => {
         console.log("🔄 Checking Initial Wallet Status...");
         await updateWalletStatus();
     }, 1000);
 
-    buyButton.addEventListener("click", sendTransaction);
+    // Refresh balances when buy button is clicked
+    buyButton.addEventListener("click", async () => {
+        await sendTransaction();
+        if (userWallet) {
+            await fetchBalances(userWallet);
+        }
+    });
 });
