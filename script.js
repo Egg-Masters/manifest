@@ -111,6 +111,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     tonConnectUI.onStatusChange(async (wallet) => {
         console.log("🔄 Wallet Status Changed:", wallet);
         await updateWalletStatus();
+
+        // ✅ Auto-update balances on wallet change
+        if (wallet && wallet.account) {
+            await fetchBalances(wallet.account.address);
+        }
     });
 
     // 🔹 Initialize UI after 1 second delay (fix potential race conditions)
