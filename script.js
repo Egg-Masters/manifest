@@ -1,12 +1,11 @@
 // Initialize TON Connect
-const { TonConnect } = window;
-const tonConnect = new TonConnect();
-
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: 'https://markmon08.github.io/Gem-SPIDER/tonconnect-manifest.json',
+    buttonRootId: 'ton-connect'
+});
 
 // DOM Elements
 document.addEventListener("DOMContentLoaded", async () => {
-    const connectButton = document.getElementById("connect-wallet-btn");
-    const disconnectButton = document.getElementById("disconnect-wallet-btn");
     const walletStatus = document.getElementById("wallet-status");
     const buyButton = document.getElementById("buy-tokens-btn");
     const amountInput = document.getElementById("amount-input");
@@ -37,41 +36,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // 🔹 Function to connect wallet
-    connectButton.addEventListener("click", async () => {
-        try {
-            const wallet = await tonConnect.connect();
-            userWallet = wallet.account.address;
+    // 🔹 Function to check wallet connection
+    async function checkWalletConnection() {
+        const connectedWallets = await tonConnectUI.getWallets();
+        if (connectedWallets.length > 0) {
+            userWallet = connectedWallets[0].account.address;
             walletStatus.innerHTML = `✅ Connected: <br> ${userWallet}`;
             walletStatus.style.color = "lightgreen";
-
-            // Update UI
-            connectButton.classList.add("hidden");
-            disconnectButton.classList.remove("hidden");
             buyButton.disabled = false; // Enable buy button
-
-            // Fetch token balance
             await fetchTokenBalance();
-        } catch (error) {
-            console.error("Wallet connection failed:", error);
-            walletStatus.innerText = "❌ Connection failed!";
+        } else {
+            walletStatus.innerText = "🔴 Not Connected";
             walletStatus.style.color = "red";
+            buyButton.disabled = true;
         }
-    });
-
-    // 🔹 Function to disconnect wallet
-    disconnectButton.addEventListener("click", () => {
-        tonConnect.disconnect();
-        userWallet = null;
-        walletStatus.innerText = "🔴 Wallet Disconnected!";
-        walletStatus.style.color = "gray";
-        
-        // Update UI
-        disconnectButton.classList.add("hidden");
-        connectButton.classList.remove("hidden");
-        buyButton.disabled = true; // Disable buy button
-        balanceDisplay.innerText = "";
-    });
+    }
 
     // 🔹 Function to send TON when "Buy" button is clicked
     buyButton.addEventListener("click", async () => {
@@ -94,12 +73,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     {
                         address: "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST", // Replace with your TON address
                         amount: (amount * 1e9).toString(), // Convert to nanoTON
-                        payload: "Purchase of $SPIDER tokens"
+                        payload: btoa("Purchase of $SPIDER tokens") // Encode payload in base64
                     }
                 ]
             };
 
-            await tonConnect.sendTransaction(transaction);
+            await tonConnectUI.sendTransaction(transaction);
             alert(`✅ Transaction sent: ${amount} TON`);
 
             // Fetch updated token balance after transaction
@@ -112,4 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Append balance display under wallet status
     walletStatus.parentElement.appendChild(balanceDisplay);
+
+    // Check wallet connection on page load
+    checkWalletConnection();
 });
