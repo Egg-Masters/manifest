@@ -23,9 +23,6 @@
         .header {
             padding: 20px;
         }
-        .logo img {
-            animation: pulse 2s infinite;
-        }
         .main-content {
             display: flex;
             justify-content: center;
@@ -36,7 +33,6 @@
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             width: 350px;
         }
         .btn-success {
@@ -49,9 +45,6 @@
             font-size: 16px;
             background-color: #28a745;
             color: white;
-        }
-        .btn-success:hover {
-            opacity: 0.8;
         }
         .balance {
             font-size: 18px;
@@ -68,21 +61,14 @@
             color: white;
             margin: 0 10px;
             font-size: 20px;
-            transition: transform 0.3s;
-        }
-        .social-icons a:hover {
-            transform: scale(1.2);
         }
     </style>
 </head>
 <body>
 
     <header class="header">
-        <div class="logo">
-            <img src="logo.png" alt="Gem Spider Logo" width="50">
-        </div>
         <h1>Gem Spider</h1>
-        <p>Token Pre Sale - Get your $SPIDER tokens now!</p>
+        <p>Token Pre Sale - Get your $SPIDEY tokens now!</p>
     </header>
 
     <main class="main-content">
@@ -90,7 +76,7 @@
             <h2>Wallet Connection</h2>
             <div id="ton-connect"></div>
 
-            <!-- Replaced Status with Balances -->
+            <!-- Balance Display -->
             <div class="balance">
                 <p><strong>TON Balance:</strong> <span id="ton-balance">0</span> TON</p>
                 <p><strong>$SPIDEY Balance:</strong> <span id="spidey-balance">0</span> $SPIDEY</p>
@@ -119,17 +105,21 @@
                 buttonRootId: 'ton-connect'
             });
 
-            async function fetchBalance(walletAddress) {
+            async function fetchBalances(walletAddress) {
                 try {
-                    // Fetch TON balance (dummy endpoint, replace with actual API)
-                    const tonResponse = await fetch(`https://tonapi.io/v1/account/getBalance?address=${walletAddress}`);
+                    // Fetch TON balance from TonAPI
+                    const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
                     const tonData = await tonResponse.json();
-                    document.getElementById("ton-balance").textContent = (tonData.balance / 1e9).toFixed(2); // Convert from nanoTON
+                    const tonBalance = tonData.balance ? (tonData.balance / 1e9).toFixed(2) : "0";
+                    document.getElementById("ton-balance").textContent = tonBalance;
 
-                    // Fetch $SPIDEY balance (replace with your token API)
-                    const spideyResponse = await fetch(`https://your-spidey-api.com/getBalance?address=${walletAddress}`);
-                    const spideyData = await spideyResponse.json();
-                    document.getElementById("spidey-balance").textContent = spideyData.balance;
+                    // Fetch $SPIDEY token balance
+                    const spideyTokenAddress = "EQxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Replace with actual contract address
+                    const tokenResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons`);
+                    const tokenData = await tokenResponse.json();
+                    const spideyBalance = tokenData.balances.find(token => token.jetton.address === spideyTokenAddress);
+                    document.getElementById("spidey-balance").textContent = spideyBalance ? (spideyBalance.balance / 1e9).toFixed(2) : "0";
+
                 } catch (error) {
                     console.error("Error fetching balances:", error);
                 }
@@ -138,7 +128,7 @@
             function updateWallet(wallet) {
                 if (wallet) {
                     document.getElementById("buy-tokens-btn").disabled = false;
-                    fetchBalance(wallet.account.address);
+                    fetchBalances(wallet.account.address);
                 } else {
                     document.getElementById("ton-balance").textContent = "0";
                     document.getElementById("spidey-balance").textContent = "0";
