@@ -1,0 +1,7 @@
+{
+    "url": "https://markmon08.github.io/Gem-SPIDER/",                        // required
+    "name": "Gem-Spider",                      // required
+    "iconUrl": "https://markmon08.github.io/Gem-SPIDER/logo.png",               // required
+    "termsOfUseUrl": "<terms-of-use-url>",     // optional
+    "privacyPolicyUrl": "<privacy-policy-url>" // optional
+}
