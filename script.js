@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             // Fetch TON Balance
             const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}`);
+            if (!tonResponse.ok) throw new Error("Failed to fetch TON balance");
             const tonData = await tonResponse.json();
             const tonBalance = tonData.balance ? formatBalance(tonData.balance) : "0";
             tonBalanceElem.textContent = tonBalance;
@@ -32,13 +33,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Fetch $SPIDEY Token Balance
             const spideyTokenAddress = "EQxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // Replace with actual contract address
             const tokenResponse = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons`);
+            if (!tokenResponse.ok) throw new Error("Failed to fetch token balance");
             const tokenData = await tokenResponse.json();
-            const spideyBalance = tokenData.balances.find(token => token.jetton.address === spideyTokenAddress);
+            const spideyBalance = tokenData.balances?.find(token => token.jetton.address === spideyTokenAddress);
             spideyBalanceElem.textContent = spideyBalance ? formatBalance(spideyBalance.balance) : "0";
 
             console.log("💰 Balances Updated:", { tonBalance, spideyBalance: spideyBalanceElem.textContent });
         } catch (error) {
-            console.error("⚠️ Error Fetching Balances:", error);
+            console.error("⚠️ Error Fetching Balances:", error.message);
+            tonBalanceElem.textContent = "Error";
+            spideyBalanceElem.textContent = "Error";
         }
     }
 
@@ -89,7 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 messages: [
                     {
                         address: recipientAddress,
-                        amount: amount * 1e9, // Convert TON to nanotons
+                        amount: (amount * 1e9).toString(), // Convert TON to nanotons
                     }
                 ]
             };
@@ -99,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Transaction sent successfully!");
         } catch (error) {
             console.error("⚠️ Transaction Failed:", error);
-            alert("Transaction failed. Please try again.");
+            alert("Transaction failed: " + error.message);
         }
     }
 
