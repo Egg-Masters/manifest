@@ -8,10 +8,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const buyButton = document.getElementById("buy-tokens-btn");
+    const amountInput = document.getElementById("amount-input");
     const tonBalanceElem = document.getElementById("ton-balance");
     const spideyBalanceElem = document.getElementById("spidey-balance");
 
     let userWallet = null;
+    const recipientAddress = "EQCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; // Replace with your recipient wallet
 
     // 🔹 Format balance to 6 decimal places
     function formatBalance(balance) {
@@ -68,6 +70,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         buyButton.disabled = true;
     }
 
+    // 🔹 Send TON Transaction
+    async function sendTransaction() {
+        if (!userWallet) {
+            alert("Please connect your wallet first.");
+            return;
+        }
+
+        const amount = parseFloat(amountInput.value);
+        if (isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid TON amount.");
+            return;
+        }
+
+        try {
+            const transaction = {
+                validUntil: Math.floor(Date.now() / 1000) + 300, // Expires in 5 minutes
+                messages: [
+                    {
+                        address: recipientAddress,
+                        amount: amount * 1e9, // Convert TON to nanotons
+                    }
+                ]
+            };
+
+            const result = await tonConnectUI.sendTransaction(transaction);
+            console.log("✅ Transaction Sent:", result);
+            alert("Transaction sent successfully!");
+        } catch (error) {
+            console.error("⚠️ Transaction Failed:", error);
+            alert("Transaction failed. Please try again.");
+        }
+    }
+
     // 🔹 Listen for Wallet Connection Status Changes
     tonConnectUI.onStatusChange(async (wallet) => {
         console.log("🔄 Wallet Status Changed:", wallet);
@@ -79,4 +114,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("🔄 Checking Initial Wallet Status...");
         await updateWalletStatus();
     }, 1000);
+
+    // Attach transaction function to buy button
+    buyButton.addEventListener("click", sendTransaction);
 });
