@@ -22,7 +22,6 @@
         }
         .header {
             padding: 20px;
-            animation: fadeIn 1.5s ease-in-out;
         }
         .logo img {
             animation: pulse 2s infinite;
@@ -39,9 +38,8 @@
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             width: 350px;
-            animation: slideUp 1s ease-in-out;
         }
-        .btn-primary, .btn-success, .btn-danger {
+        .btn-success {
             width: 100%;
             padding: 10px;
             margin-top: 10px;
@@ -49,12 +47,16 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            background-color: #28a745;
+            color: white;
         }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-success { background-color: #28a745; color: white; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-hover:hover { opacity: 0.8; }
-        .hidden { display: none; }
+        .btn-success:hover {
+            opacity: 0.8;
+        }
+        .balance {
+            font-size: 18px;
+            margin-top: 15px;
+        }
         .footer {
             padding: 15px;
             background: rgba(0, 0, 0, 0.2);
@@ -71,9 +73,6 @@
         .social-icons a:hover {
             transform: scale(1.2);
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -90,13 +89,17 @@
         <div class="card">
             <h2>Wallet Connection</h2>
             <div id="ton-connect"></div>
-            <p id="wallet-status" class="status">🔴 Not Connected</p>
+
+            <!-- Replaced Status with Balances -->
+            <div class="balance">
+                <p><strong>TON Balance:</strong> <span id="ton-balance">0</span> TON</p>
+                <p><strong>$SPIDEY Balance:</strong> <span id="spidey-balance">0</span> $SPIDEY</p>
+            </div>
 
             <div class="buy-section">
-                <h2>Buy $SPIDER Tokens</h2>
+                <h2>Buy $SPIDEY Tokens</h2>
                 <input type="number" id="amount-input" placeholder="Enter TON amount">
-                <button id="buy-tokens-btn" class="btn-success btn-hover" disabled>Buy $SPIDER</button>
-                <p id="transaction-status" class="status"></p>
+                <button id="buy-tokens-btn" class="btn-success" disabled>Buy $SPIDEY</button>
             </div>
         </div>
     </main>
@@ -108,31 +111,47 @@
         </div>
     </footer>
 
-    <!-- TON Connect Initialization -->
+    <!-- TON Connect and Balance Fetching -->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", async function () {
             const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
                 manifestUrl: 'https://markmon08.github.io/Gem-SPIDER/tonconnect-manifest.json',
                 buttonRootId: 'ton-connect'
             });
 
-            function updateWalletStatus(wallet) {
-                if (wallet) {
-                    document.getElementById("wallet-status").textContent = "🟢 Connected: " + wallet.account.address;
-                    document.getElementById("buy-tokens-btn").disabled = false; // Enable button on connection
-                } else {
-                    document.getElementById("wallet-status").textContent = "🔴 Not Connected";
-                    document.getElementById("buy-tokens-btn").disabled = true; // Disable button when not connected
+            async function fetchBalance(walletAddress) {
+                try {
+                    // Fetch TON balance (dummy endpoint, replace with actual API)
+                    const tonResponse = await fetch(`https://tonapi.io/v1/account/getBalance?address=${walletAddress}`);
+                    const tonData = await tonResponse.json();
+                    document.getElementById("ton-balance").textContent = (tonData.balance / 1e9).toFixed(2); // Convert from nanoTON
+
+                    // Fetch $SPIDEY balance (replace with your token API)
+                    const spideyResponse = await fetch(`https://your-spidey-api.com/getBalance?address=${walletAddress}`);
+                    const spideyData = await spideyResponse.json();
+                    document.getElementById("spidey-balance").textContent = spideyData.balance;
+                } catch (error) {
+                    console.error("Error fetching balances:", error);
                 }
             }
 
-            // Check wallet status immediately when the page loads
-            tonConnectUI.getWallet().then(updateWalletStatus).catch(() => {
-                document.getElementById("wallet-status").textContent = "🔴 Not Connected";
+            function updateWallet(wallet) {
+                if (wallet) {
+                    document.getElementById("buy-tokens-btn").disabled = false;
+                    fetchBalance(wallet.account.address);
+                } else {
+                    document.getElementById("ton-balance").textContent = "0";
+                    document.getElementById("spidey-balance").textContent = "0";
+                    document.getElementById("buy-tokens-btn").disabled = true;
+                }
+            }
+
+            tonConnectUI.getWallet().then(updateWallet).catch(() => {
+                document.getElementById("ton-balance").textContent = "0";
+                document.getElementById("spidey-balance").textContent = "0";
             });
 
-            // Monitor Wallet Connection Status
-            tonConnectUI.onStatusChange(updateWalletStatus);
+            tonConnectUI.onStatusChange(updateWallet);
         });
     </script>
 
