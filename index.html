@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script src="script.js"></script>
+    
     <!-- TON Connect SDK -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -49,24 +50,11 @@
             cursor: pointer;
             font-size: 16px;
         }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-success {
-            background-color: #28a745;
-            color: white;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-hover:hover {
-            opacity: 0.8;
-        }
-        .hidden {
-            display: none;
-        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-hover:hover { opacity: 0.8; }
+        .hidden { display: none; }
         .footer {
             padding: 15px;
             background: rgba(0, 0, 0, 0.2);
@@ -83,22 +71,13 @@
         .social-icons a:hover {
             transform: scale(1.2);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
+
     <header class="header">
         <div class="logo">
             <img src="logo.png" alt="Gem Spider Logo" width="50">
@@ -106,17 +85,13 @@
         <h1>Gem Spider</h1>
         <p>Token Pre Sale - Get your $SPIDER tokens now!</p>
     </header>
+
     <main class="main-content">
         <div class="card">
             <h2>Wallet Connection</h2>
             <div id="ton-connect"></div>
             <p id="wallet-status" class="status">🔴 Not Connected</p>
-            <script>
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://markmon08.github.io/Gem-SPIDER/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect'
-    });
-            </script>
+
             <div class="buy-section">
                 <h2>Buy $SPIDER Tokens</h2>
                 <input type="number" id="amount-input" placeholder="Enter TON amount">
@@ -125,11 +100,35 @@
             </div>
         </div>
     </main>
+
     <footer class="footer">
         <div class="social-icons">
             <a href="#"><i class="fab fa-twitter"></i></a>
             <a href="#"><i class="fab fa-telegram"></i></a>
         </div>
     </footer>
+
+    <!-- TON Connect Initialization -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://markmon08.github.io/Gem-SPIDER/tonconnect-manifest.json',
+                buttonRootId: 'ton-connect'
+            });
+
+            // Monitor Wallet Connection Status
+            tonConnectUI.onStatusChange(wallet => {
+                console.log("Wallet Status:", wallet);
+                if (wallet) {
+                    document.getElementById("wallet-status").textContent = "🟢 Connected: " + wallet.account.address;
+                } else {
+                    document.getElementById("wallet-status").textContent = "🔴 Not Connected";
+                }
+            });
+        });
+    </script>
+
+    <script src="script.js"></script>
+
 </body>
 </html>
