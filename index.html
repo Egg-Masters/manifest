@@ -113,6 +113,12 @@
             <button id="connect-wallet-btn" class="btn-primary btn-hover">Connect Wallet</button>
             <button id="disconnect-wallet-btn" class="btn-danger btn-hover hidden">Disconnect Wallet</button>
             <p id="wallet-status" class="status">🔴 Not Connected</p>
+            <script>
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://https://markmon08.github.io/Gem-SPIDER/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect'
+    });
+            </script>
             <div class="buy-section">
                 <h2>Buy $SPIDER Tokens</h2>
                 <input type="number" id="amount-input" placeholder="Enter TON amount">
