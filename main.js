@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Function to update balances
   async function updateBalances() {
-    const tonBalance = document.getElementById('ton-balance');
     const spideyBalance = document.getElementById('spidey-balance');
 
     if (userWallet) {
