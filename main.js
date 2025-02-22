@@ -6,7 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   let userWallet = null;
-  const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Your token contract address
+  const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Token contract address
+  const receiverAddress = "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST"; // Receiving address
 
   // Handle wallet connection changes
   tonConnectUI.onStatusChange(wallet => {
@@ -36,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Fetch $SPIDEY token balance
         const jettonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet}/jettons`);
         const jettonData = await jettonResponse.json();
-        
+
         console.log("Jetton Data:", jettonData); // Debugging
 
         const jetton = jettonData.balances.find(j => j.jetton.address === contractAddress);
@@ -68,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         validUntil: Math.floor(Date.now() / 1000) + 600, // Transaction valid for 10 minutes
         messages: [
           {
-            address: contractAddress,
+            address: receiverAddress, // The correct receiving address
             amount: (amount * 1e9).toString(), // Convert TON to nanotons
             payload: "" // Add payload if needed
           }
