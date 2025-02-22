@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       // Fetch TON balance
       const tonBalance = await fetchTonBalance(userWallet.address);
-      tonBalanceEl.textContent = `${tonBalance.toFixed(2)} TON`;
+      tonBalanceEl.textContent = `${tonBalance} TON`;
 
       // Fetch SPIDEY token balance
       const spideyBalance = await fetchTokenBalance(userWallet.address);
@@ -42,23 +42,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const response = await fetch(`https://tonapi.io/v2/accounts/${address}`);
       const data = await response.json();
-      return data.balance ? data.balance / 1e9 : 0; // Convert from nanotons to TON
+      
+      if (data && data.balance) {
+        return (parseInt(data.balance) / 1e9).toFixed(3); // Convert from nanotons to TON (3 decimal places)
+      } 
+      
+      return "0.000";
     } catch (error) {
       console.error("Error fetching TON balance:", error);
-      return 0;
+      return "0.000";
     }
   }
 
   // Function to fetch SPIDEY token balance from contract
   async function fetchTokenBalance(address) {
-    const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Replace with your actual contract address
+    const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Your correct SPIDEY token contract
     try {
       const response = await fetch(`https://tonapi.io/v2/accounts/${address}/tokens/${contractAddress}`);
       const data = await response.json();
-      return data.balance ? data.balance : 0;
+      
+      if (data && data.balance) {
+        return data.balance.toString(); // Return token balance as a string
+      }
+      
+      return "0";
     } catch (error) {
       console.error("Error fetching SPIDEY balance:", error);
-      return 0;
+      return "0";
     }
   }
 
@@ -80,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         validUntil: Math.floor(Date.now() / 1000) + 600, // Transaction valid for 10 minutes
         messages: [
           {
-            address: "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST", // Replace with your token contract address
+            address: "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST", // Correct SPIDEY token contract address
             amount: (amount * 1e9).toString(), // Convert TON to nanotons
             payload: "" // Add payload if needed
           }
