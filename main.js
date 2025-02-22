@@ -1,4 +1,4 @@
-const tonConnectUI = new TonConnectUI.TonConnectUI({
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
   manifestUrl: 'https://markmon08.github.io/gemspider/tonconnect-manifest.json',
   buttonRootId: 'wallet-connection'
 });
