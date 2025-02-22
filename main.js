@@ -6,82 +6,60 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   let userWallet = null;
+  const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Your token contract address
 
   // Handle wallet connection changes
   tonConnectUI.onStatusChange(wallet => {
-    userWallet = wallet;
-    updateBalances();
+    console.log("Wallet Connected:", wallet);
+    if (wallet && wallet.account && wallet.account.address) {
+      userWallet = wallet.account.address;
+      console.log("Wallet Address:", userWallet);
+      updateBalances();
+    } else {
+      console.error("Wallet connection failed or address is missing.");
+    }
   });
 
-  // Function to fetch and update balances
+  // Function to update balances
   async function updateBalances() {
-    const tonBalanceEl = document.getElementById('ton-balance');
-    const spideyBalanceEl = document.getElementById('spidey-balance');
+    const tonBalance = document.getElementById('ton-balance');
+    const spideyBalance = document.getElementById('spidey-balance');
 
-    if (!userWallet) {
-      tonBalanceEl.textContent = '0 TON';
-      spideyBalanceEl.textContent = '0 SPIDEY';
-      return;
-    }
+    if (userWallet) {
+      try {
+        // Fetch TON balance
+        const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet}`);
+        const tonData = await tonResponse.json();
+        const balance = (tonData.balance / 1e9).toFixed(2);
+        tonBalance.textContent = `${balance} TON`;
 
-    try {
-      // Fetch TON balance
-      const tonBalance = await fetchTonBalance(userWallet.address);
-      tonBalanceEl.textContent = `${tonBalance} TON`;
+        // Fetch $SPIDEY token balance
+        const jettonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet}/jettons`);
+        const jettonData = await jettonResponse.json();
+        
+        console.log("Jetton Data:", jettonData); // Debugging
 
-      // Fetch SPIDEY token balance
-      const spideyBalance = await fetchTokenBalance(userWallet.address);
-      spideyBalanceEl.textContent = `${spideyBalance} SPIDEY`;
-    } catch (error) {
-      console.error("Failed to fetch balances:", error);
-    }
-  }
-
-  // Function to fetch TON balance from API
-  async function fetchTonBalance(address) {
-    try {
-      const response = await fetch(`https://tonapi.io/v2/accounts/${address}`);
-      const data = await response.json();
-      
-      if (data && data.balance) {
-        return (parseInt(data.balance) / 1e9).toFixed(3); // Convert from nanotons to TON (3 decimal places)
-      } 
-      
-      return "0.000";
-    } catch (error) {
-      console.error("Error fetching TON balance:", error);
-      return "0.000";
-    }
-  }
-
-  // Function to fetch SPIDEY token balance from contract
-  async function fetchTokenBalance(address) {
-    const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Your correct SPIDEY token contract
-    try {
-      const response = await fetch(`https://tonapi.io/v2/accounts/${address}/jettons/${contractAddress}`);
-      const data = await response.json();
-      
-      if (data && data.balance) {
-        return data.balance.toString(); // Return token balance as a string
+        const jetton = jettonData.balances.find(j => j.jetton.address === contractAddress);
+        spideyBalance.textContent = jetton ? `${(jetton.balance / 1e9).toFixed(2)} SPIDEY` : "0 SPIDEY";
+      } catch (error) {
+        console.error("Error fetching balances:", error);
       }
-      
-      return "0";
-    } catch (error) {
-      console.error("Error fetching SPIDEY balance:", error);
-      return "0";
+    } else {
+      tonBalance.textContent = "0 TON";
+      spideyBalance.textContent = "0 SPIDEY";
     }
   }
 
   // Handle token purchase
   document.getElementById('buy-button').addEventListener('click', async () => {
     if (!userWallet) {
-      alert('Please connect your wallet first.');
+      alert("Please connect your wallet first.");
       return;
     }
 
     const amount = document.getElementById('ton-amount').value;
     if (!amount || amount <= 0) {
-      alert('Please enter a valid amount.');
+      alert("Please enter a valid amount.");
       return;
     }
 
@@ -90,7 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         validUntil: Math.floor(Date.now() / 1000) + 600, // Transaction valid for 10 minutes
         messages: [
           {
-            address: "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST", // Correct SPIDEY token contract address
+            address: contractAddress,
             amount: (amount * 1e9).toString(), // Convert TON to nanotons
             payload: "" // Add payload if needed
           }
