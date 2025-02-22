@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function fetchTokenBalance(address) {
     const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Your correct SPIDEY token contract
     try {
-      const response = await fetch(`https://tonapi.io/v2/accounts/${address}/tokens/${contractAddress}`);
+      const response = await fetch(`https://tonapi.io/v2/accounts/${address}/jettons/${contractAddress}`);
       const data = await response.json();
       
       if (data && data.balance) {
