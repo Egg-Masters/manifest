@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             } catch (error) {
                 console.error("Error fetching balances:", error);
                 tonBalance.textContent = "0.00 TON";
-                spideyBalance.textContent = "0.00 SPIDEY";
+                spideyBalance.textContent = "TRY-HARDER SPIDEY";
             }
         } else {
             tonBalance.textContent = "0.00 TON";
