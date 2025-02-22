@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let userWallet = null;
   const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Your token contract address
-  // const receiverAddress
+  const receiverAddress = "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST";
 
   // Handle wallet connection changes
   tonConnectUI.onStatusChange(wallet => {
@@ -69,7 +69,7 @@ document.getElementById('buy-button').addEventListener('click', async () => {
             validUntil: Math.floor(Date.now() / 1000) + 600, // Transaction valid for 10 minutes
             messages: [
                 {
-                    address: UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST, // Receiving wallet address
+                    address: receiverAddress, // Receiving wallet address
                     amount: (amount * 1e9).toString(), // Convert TON to nanotons
                     payload: "" // Optional payload data
                 }
