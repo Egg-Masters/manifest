@@ -1,7 +1,5 @@
-<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-
 <script>
-  const tonConnectUI = new TonConnectUI.TonConnectUI({
+  const tonConnectUI = new TonConnectUI({
     manifestUrl: 'https://markmon08.github.io/gemspider/tonconnect-manifest.json',
     buttonRootId: 'wallet-connection'
   });
