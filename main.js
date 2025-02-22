@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+ldocument.addEventListener("DOMContentLoaded", () => {
   const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
     manifestUrl: 'https://markmon08.github.io/gemspider/tonconnect-manifest.json',
     buttonRootId: 'wallet-connection'
@@ -37,7 +37,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      alert('This is a demo. In a real application, this would initiate a token purchase transaction.');
+      try {
+  const transaction = {
+    validUntil: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes
+    messages: [
+      {
+        address: "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST",
+        amount: (amount * 1e9).toString(), // Convert TON to nanotons
+        payload: "" // If needed, add payload data here
+      }
+    ]
+  };
+
+  const result = await tonConnectUI.sendTransaction(transaction);
+  console.log("Transaction sent:", result);
+  alert("Transaction sent successfully!");
+} catch (error) {
+  console.error("Transaction failed:", error);
+  alert("Transaction failed. Please try again.");
+}
+
     } catch (error) {
       console.error('Transaction failed:', error);
       alert('Transaction failed. Please try again.');
