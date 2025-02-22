@@ -23,29 +23,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (userWallet) {
             try {
-                // Fetch TON balance
-                const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet.address}`);
-                const tonData = await tonResponse.json();
+    // Fetch TON balance
+    const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet.address}`);
+    const tonData = await tonResponse.json();
+    tonBalance.textContent = tonData.balance
+        ? `${(tonData.balance / 1e9).toFixed(2)} TON`
+        : "0.00 TON";
 
-                if (tonData.balance) {
-                    tonBalance.textContent = `${(tonData.balance / 1e9).toFixed(2)} TON`;
-                } else {
-                    tonBalance.textContent = "0.00 TON";
-                }
+    // Fetch Jetton balance (SPIDEY)
+    const spideyResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet.address}/jettons/EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9`);
+    const spideyData = await spideyResponse.json();
+    
+    console.log("SPIDEY API Response:", spideyData);
 
-                // Fetch Jetton balance (SPIDEY)
-                const spideyResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet.address}/jettons/EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9`);
-                const spideyData = await spideyResponse.json();
-
-                console.log("SPIDEY API Response:", spideyData);
-
-                if (spideyData.balance) {
-                    spideyBalance.textContent = `${(spideyData.balance / 1e9).toFixed(2)} SPIDEY`;
-                } else {
-                    spideyBalance.textContent = "0.00 SPIDEY";
-                }
-
-            } catch (error) {
+    spideyBalance.textContent = spideyData.balance
+        ? `${(spideyData.balance / 1e9).toFixed(2)} SPIDEY`
+        : "0.00 SPIDEY";
+} catch (error) {
+    console.error("Error fetching balances:", error);
+    tonBalance.textContent = "Error";
+    spideyBalance.textContent = "Error";
+            }
+            catch (error) {
                 console.error("Error fetching balances:", error);
                 tonBalance.textContent = "0.00 TON";
                 spideyBalance.textContent = "TRY-HARDER SPIDEY";
