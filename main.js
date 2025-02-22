@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         validUntil: Math.floor(Date.now() / 1000) + 600, // Transaction valid for 10 minutes
         messages: [
           {
-            address: contractAddress,
+            address: UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST,
             amount: (amount * 1e9).toString(), // Convert TON to nanotons
             payload: "" // Add payload if needed
           }
