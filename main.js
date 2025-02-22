@@ -13,16 +13,52 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateBalances();
   });
 
-  // Function to update balances
+  // Function to fetch and update balances
   async function updateBalances() {
-    const spideyBalance = document.getElementById('spidey-balance');
+    const tonBalanceEl = document.getElementById('ton-balance');
+    const spideyBalanceEl = document.getElementById('spidey-balance');
 
-    if (userWallet) {
-      tonBalance.textContent = `${(userWallet.balance / 1000000000).toFixed(2)} TON`;
-      spideyBalance.textContent = '0 SPIDEY'; // This would be fetched from your token contract
-    } else {
-      tonBalance.textContent = '0 TON';
-      spideyBalance.textContent = '0 SPIDEY';
+    if (!userWallet) {
+      tonBalanceEl.textContent = '0 TON';
+      spideyBalanceEl.textContent = '0 SPIDEY';
+      return;
+    }
+
+    try {
+      // Fetch TON balance
+      const tonBalance = await fetchTonBalance(userWallet.address);
+      tonBalanceEl.textContent = `${tonBalance.toFixed(2)} TON`;
+
+      // Fetch SPIDEY token balance
+      const spideyBalance = await fetchTokenBalance(userWallet.address);
+      spideyBalanceEl.textContent = `${spideyBalance} SPIDEY`;
+    } catch (error) {
+      console.error("Failed to fetch balances:", error);
+    }
+  }
+
+  // Function to fetch TON balance from API
+  async function fetchTonBalance(address) {
+    try {
+      const response = await fetch(`https://tonapi.io/v2/accounts/${address}`);
+      const data = await response.json();
+      return data.balance ? data.balance / 1e9 : 0; // Convert from nanotons to TON
+    } catch (error) {
+      console.error("Error fetching TON balance:", error);
+      return 0;
+    }
+  }
+
+  // Function to fetch SPIDEY token balance from contract
+  async function fetchTokenBalance(address) {
+    const contractAddress = "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST"; // Replace with your actual contract address
+    try {
+      const response = await fetch(`https://tonapi.io/v2/accounts/${address}/tokens/${contractAddress}`);
+      const data = await response.json();
+      return data.balance ? data.balance : 0;
+    } catch (error) {
+      console.error("Error fetching SPIDEY balance:", error);
+      return 0;
     }
   }
 
