@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Jetton contract address
+    // const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Jetton contract address
     const receiverAddress = "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST"; // TON Receiver address
 
     // Initialize TonConnect UI
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
 
                 // Fetch Jetton balance (SPIDEY)
-                const spideyResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet.address}/jettons/${contractAddress}`);
+                const spideyResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet.address}/jettons/EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9`);
                 const spideyData = await spideyResponse.json();
 
                 console.log("SPIDEY API Response:", spideyData);
