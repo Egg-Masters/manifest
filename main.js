@@ -11,13 +11,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Handle wallet connection changes
   tonConnectUI.onStatusChange(wallet => {
-    console.log("Wallet Connected:", wallet);
+    console.log("Wallet Status Changed:", wallet);
+
     if (wallet && wallet.account && wallet.account.address) {
-      userWallet = wallet.account.address;
-      console.log("Wallet Address:", userWallet);
+      userWallet = wallet.account.address; // Correctly set the wallet address
+      console.log("User Wallet Address:", userWallet);
       updateBalances();
     } else {
       console.error("Wallet connection failed or address is missing.");
+      userWallet = null;
     }
   });
 
@@ -31,21 +33,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Fetch TON balance
         const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet}`);
         const tonData = await tonResponse.json();
-        const balance = (tonData.balance / 1e9).toFixed(2);
-        tonBalance.textContent = `${balance} TON`;
+        console.log("TON Data:", tonData); // Debugging
+
+        if (tonData.balance) {
+          tonBalance.textContent = `${(tonData.balance / 1e9).toFixed(2)} TON`;
+        } else {
+          tonBalance.textContent = "0 TON";
+        }
 
         // Fetch $SPIDEY token balance
         const jettonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet}/jettons`);
         const jettonData = await jettonResponse.json();
-
         console.log("Jetton Data:", jettonData); // Debugging
 
         const jetton = jettonData.balances.find(j => j.jetton.address === contractAddress);
         spideyBalance.textContent = jetton ? `${(jetton.balance / 1e9).toFixed(2)} SPIDEY` : "0 SPIDEY";
       } catch (error) {
         console.error("Error fetching balances:", error);
+        tonBalance.textContent = "0 TON";
+        spideyBalance.textContent = "0 SPIDEY";
       }
     } else {
+      console.warn("User wallet is not connected.");
       tonBalance.textContent = "0 TON";
       spideyBalance.textContent = "0 SPIDEY";
     }
@@ -69,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         validUntil: Math.floor(Date.now() / 1000) + 600, // Transaction valid for 10 minutes
         messages: [
           {
-            address: receiverAddress, // The correct receiving address
+            address: receiverAddress, // Correct receiving address
             amount: (amount * 1e9).toString(), // Convert TON to nanotons
             payload: "" // Add payload if needed
           }
