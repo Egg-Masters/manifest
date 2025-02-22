@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Function to fetch SPIDEY token balance from contract
   async function fetchTokenBalance(address) {
-    const contractAddress = "UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST"; // Replace with your actual contract address
+    const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Replace with your actual contract address
     try {
       const response = await fetch(`https://tonapi.io/v2/accounts/${address}/tokens/${contractAddress}`);
       const data = await response.json();
