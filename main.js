@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Fetch TON balance
         const tonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet}`);
         const tonData = await tonResponse.json();
-        console.log("TON Data:", tonData); // Debugging
+        console.log("TON Data:", tonData);
 
         if (tonData.balance) {
           tonBalance.textContent = `${(tonData.balance / 1e9).toFixed(2)} TON`;
@@ -41,13 +41,17 @@ document.addEventListener("DOMContentLoaded", async () => {
           tonBalance.textContent = "0 TON";
         }
 
-        // Fetch $SPIDEY token balance
-        const jettonResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet}/jettons`);
-        const jettonData = await jettonResponse.json();
-        console.log("Jetton Data:", jettonData); // Debugging
+        // Fetch $SPIDEY token balance (Direct API method)
+        const spideyResponse = await fetch(`https://tonapi.io/v2/accounts/${userWallet}/jettons/${contractAddress}`);
+        const spideyData = await spideyResponse.json();
+        console.log("SPIDEY API Response:", spideyData);
 
-        const jetton = jettonData.balances.find(j => j.jetton.address === contractAddress);
-        spideyBalance.textContent = jetton ? `${(jetton.balance / 1e9).toFixed(2)} SPIDEY` : "0 SPIDEY";
+        if (spideyData.balance) {
+          spideyBalance.textContent = `${(spideyData.balance / 1e9).toFixed(2)} SPIDEY`;
+        } else {
+          spideyBalance.textContent = "0 SPIDEY";
+        }
+
       } catch (error) {
         console.error("Error fetching balances:", error);
         tonBalance.textContent = "0 TON";
