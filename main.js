@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let userWallet = null;
   const contractAddress = "EQBUMjg7ROfjh_ou3Lz1lpNrTJN59h2S-Wm-ZPsWWVzn-xc9"; // Your token contract address
+  // const receiverAddress
 
   // Handle wallet connection changes
   tonConnectUI.onStatusChange(wallet => {
@@ -51,36 +52,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Handle token purchase
-  document.getElementById('buy-button').addEventListener('click', async () => {
+document.getElementById('buy-button').addEventListener('click', async () => {
     if (!userWallet) {
-      alert("Please connect your wallet first.");
-      return;
+        alert('Please connect your wallet first.');
+        return;
     }
 
     const amount = document.getElementById('ton-amount').value;
     if (!amount || amount <= 0) {
-      alert("Please enter a valid amount.");
-      return;
+        alert('Please enter a valid amount.');
+        return;
     }
 
     try {
-      const transaction = {
-        validUntil: Math.floor(Date.now() / 1000) + 600, // Transaction valid for 10 minutes
-        messages: [
-          {
-            address: UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST,
-            amount: (amount * 1e9).toString(), // Convert TON to nanotons
-            payload: "" // Add payload if needed
-          }
-        ]
-      };
+        const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 600, // Transaction valid for 10 minutes
+            messages: [
+                {
+                    address: UQAVhdnM_-BLbS6W4b1BF5UyGWuIapjXRZjNJjfve7StCqST, // Receiving wallet address
+                    amount: (amount * 1e9).toString(), // Convert TON to nanotons
+                    payload: "" // Optional payload data
+                }
+            ]
+        };
 
-      const result = await tonConnectUI.sendTransaction(transaction);
-      console.log("Transaction sent:", result);
-      alert("Transaction sent successfully!");
+        const result = await tonConnectUI.sendTransaction(transaction);
+        console.log("Transaction sent:", result);
+        alert("Transaction sent successfully!");
     } catch (error) {
-      console.error("Transaction failed:", error);
-      alert("Transaction failed. Please try again.");
+        console.error("Transaction failed:", error);
+        alert("Transaction failed. Please try again.");
     }
   });
 });
