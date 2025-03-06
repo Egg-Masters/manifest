@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("Jetton Data:", jettonData); // Debugging
 
         const jetton = jettonData.balances.find(j => j.jetton.address === contractAddress);
-        spideyBalance.textContent = jetton ? `${(jetton.balance / 1e9).toFixed(2)} SPIDEY` : "0 SPIDEY";
+        spideyBalance.textContent = jetton ? `${(jetton.balance / 1e9).toFixed(2)} SPIDER` : "0 SPIDER";
       } catch (error) {
         console.error("Error fetching balances:", error);
       }
