@@ -1,7 +1,7 @@
 {
     "url": "https://egg-masters.github.io/manifest/",
     "name": "Egg Masters",
-    "iconUrl": "https://mkernel50.github.io/manifest/",
+    "iconUrl": "https://egg-masters.github.io/manifest/eggmaster.png",
     "termsOfUseUrl": "<terms-of-use-url>",
     "privacyPolicyUrl": "<privacy-policy-url>"
 }
